@@ -14,7 +14,7 @@ var texture: *sdl.SDL_Texture = undefined;
 var renderer: *sdl.SDL_Renderer = undefined;
 
 pub fn init(buffer: fe.FireBuffer, allocator: *std.mem.Allocator) !fe.FireRenderer {
-    try init_window(buffer);
+    try initWindow(buffer);
 
     back_buffer = try allocator.alloc(u32, (buffer.width * buffer.height));
 
@@ -25,7 +25,7 @@ pub fn init(buffer: fe.FireBuffer, allocator: *std.mem.Allocator) !fe.FireRender
     };
 }
 
-fn init_window(buffer: fe.FireBuffer) !void {
+fn initWindow(buffer: fe.FireBuffer) !void {
     if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO) != 0) {
         sdl.SDL_Log("Unable to initialize SDL: %s", sdl.SDL_GetError());
         return error.SDLInitializationFailed;

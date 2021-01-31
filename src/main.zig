@@ -47,7 +47,7 @@ pub fn main() !void {
     }
 }
 
-fn parseArgOrPrintHelp(comptime T: type, arg: ?std.process.ArgIterator.NextError![]u8, message: []const u8) !T {
+fn parseArgOrPrintHelp(comptime T: type, arg: ?std.process.ArgIterator.NextError![:0]u8, message: []const u8) !T {
     if (arg) |arg_unwrapped| {
         const radix = 10;
         const result = try std.fmt.parseInt(T, try arg_unwrapped, radix);

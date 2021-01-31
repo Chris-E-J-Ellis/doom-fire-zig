@@ -2,9 +2,11 @@ const Builder = @import("std").build.Builder;
 const std = @import("std");
 
 pub fn build(b: *Builder) void {
+    const target = b.standardTargetOptions(.{});
     const mode = b.standardReleaseOptions();
     const exe = b.addExecutable("doom-fire", "src/main.zig");
-    exe.setBuildMode(mode);
+    exe.setTarget(target);
+
     exe.linkSystemLibrary("c");
     exe.linkSystemLibrary("sdl2");
 
@@ -28,6 +30,7 @@ pub fn build(b: *Builder) void {
         });
     }
 
+    exe.setBuildMode(mode);
     exe.install();
 
     const run_cmd = exe.run();

@@ -13,15 +13,15 @@ pub const FireRenderer = struct {
     poll_function: fn () bool,
     cleanup_function: fn () void,
 
-    fn render(self: FireRenderer, buffer: FireBuffer) void {
+    pub fn render(self: FireRenderer, buffer: FireBuffer) void {
         self.render_function(buffer);
     }
 
-    fn pollForExit(self: FireRenderer) bool {
+    pub fn pollForExit(self: FireRenderer) bool {
         return self.poll_function();
     }
 
-    fn cleanup(self: FireRenderer) void {
+    pub fn cleanup(self: FireRenderer) void {
         self.cleanup_function();
     }
 };
@@ -36,15 +36,7 @@ pub fn initialiseBuffer(buffer: FireBuffer, ignition_value: u8) void {
         x.* = ignition_value;
     }
 
-    initialisePrng() catch undefined;
-}
-
-fn initialisePrng() !void {
-    // Init random using method from rand.zig
-    var buf: [8]u8 = undefined;
-    std.crypto.randomBytes(buf[0..]) catch undefined;
-    const seed = std.mem.readIntLittle(u64, buf[0..8]);
-    prng = std.rand.DefaultPrng.init(seed);
+    prng = std.rand.DefaultPrng.init(std.crypto.random.int(u64));
 }
 
 pub fn stepFire(buffer: FireBuffer) void {
