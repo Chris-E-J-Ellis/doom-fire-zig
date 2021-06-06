@@ -54,7 +54,7 @@ fn parseArgOrPrintHelp(comptime T: type, arg: ?std.process.ArgIterator.NextError
         return result;
     }
 
-    std.debug.warn("{}\n\n", .{message});
+    std.debug.warn("{s}\n\n", .{message});
     printHelp();
     return error.InvalidArgs;
 }
