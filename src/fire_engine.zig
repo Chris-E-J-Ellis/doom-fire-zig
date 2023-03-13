@@ -9,9 +9,9 @@ pub const FireBuffer = struct {
 };
 
 pub const FireRenderer = struct {
-    render_function: fn (buffer: FireBuffer) void,
-    poll_function: fn () bool,
-    cleanup_function: fn () void,
+    render_function: *const fn (buffer: FireBuffer) void,
+    poll_function: *const fn () bool,
+    cleanup_function: *const fn () void,
 
     pub fn render(self: FireRenderer, buffer: FireBuffer) void {
         self.render_function(buffer);
@@ -51,16 +51,20 @@ pub fn stepFire(buffer: FireBuffer) void {
 }
 
 fn spreadFire(buffer: FireBuffer, source_position: usize) void {
-    var pixel = buffer.buffer[source_position];
+    const pixel = buffer.buffer[source_position];
     if (pixel == 0) {
         buffer.buffer[source_position - buffer.width] = 0;
     } else {
         // Decay range should be 0..3, but I prefer the way 0..2 looks.
-        var decay = prng.random.intRangeAtMost(u8, 0, 2);
-        var destination_position = (source_position - buffer.width + 1);
-        if (@subWithOverflow(usize, destination_position, decay, &destination_position)) {
+        const decay = prng.random().intRangeAtMost(u8, 0, 2);
+
+        // decay subtraction may overflow, do it in the next step.
+        const destination_position = (source_position - buffer.width + 1);
+        const dest_sub_decay_result = @subWithOverflow(destination_position, decay);
+        if (dest_sub_decay_result[1] != 0) {
             return;
         }
-        buffer.buffer[destination_position] = pixel - (decay & 1);
+
+        buffer.buffer[dest_sub_decay_result[0]] = pixel - (decay & 1);
     }
 }

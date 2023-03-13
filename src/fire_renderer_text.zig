@@ -20,11 +20,11 @@ pub fn renderFire(buffer: fe.FireBuffer) void {
             var pixel = buffer.buffer[pos] % doom_alpha_palette.len;
 
             var char: u8 = doom_alpha_palette[pixel];
-            std.debug.warn("{c}", .{char});
+            std.log.warn("{c}", .{char});
         }
-        std.debug.warn("\n", .{});
+        std.log.warn("\n", .{});
     }
-    std.debug.warn("\n", .{});
+    std.log.warn("\n", .{});
 }
 
 pub fn pollForExit() bool {

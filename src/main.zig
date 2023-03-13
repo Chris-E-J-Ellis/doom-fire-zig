@@ -10,15 +10,15 @@ const ms_per_ns = 1_000_000;
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.c_allocator);
     defer arena.deinit();
-    var allocator = &arena.allocator;
+    var allocator = arena.allocator();
 
-    var arg_it = process.args();
+    var arg_it = try process.argsWithAllocator(allocator);
     _ = arg_it.skip();
 
-    const width = try parseArgOrPrintHelp(usize, arg_it.next(allocator), "Expected first argument to be WIDTH");
-    const height = try parseArgOrPrintHelp(usize, arg_it.next(allocator), "Expected second argument to be HEIGHT");
-    const delay_ms = parseArgOrPrintHelp(u64, arg_it.next(allocator), "Expected third argument to be SLEEP, using default 0ms") catch 0;
-    const use_alternate_renderer = if (arg_it.next(allocator)) |_| true else false;
+    const width = try parseArgOrPrintHelp(usize, arg_it.next(), "Expected first argument to be WIDTH");
+    const height = try parseArgOrPrintHelp(usize, arg_it.next(), "Expected second argument to be HEIGHT");
+    const delay_ms = parseArgOrPrintHelp(u64, arg_it.next(), "Expected third argument to be SLEEP, using default 0ms") catch 0;
+    const use_alternate_renderer = if (arg_it.next()) |_| true else false;
     const delay_ns = delay_ms * ms_per_ns;
 
     const buffer = try allocator.alloc(u8, width * height);
@@ -34,7 +34,7 @@ pub fn main() !void {
     const renderer = if (use_alternate_renderer)
         fr_text.init()
     else
-        try fr_sdl.init(fireBuffer, allocator);
+        try fr_sdl.init(fireBuffer, &allocator);
     defer renderer.cleanup();
 
     var exit_requested = false;
@@ -47,20 +47,20 @@ pub fn main() !void {
     }
 }
 
-fn parseArgOrPrintHelp(comptime T: type, arg: ?std.process.ArgIterator.NextError![:0]u8, message: []const u8) !T {
-    if (arg) |arg_unwrapped| {
+fn parseArgOrPrintHelp(comptime T: type, optional_arg: ?[:0]const u8, message: []const u8) !T {
+    if (optional_arg) |arg| {
         const radix = 10;
-        const result = try std.fmt.parseInt(T, try arg_unwrapped, radix);
+        const result = try std.fmt.parseInt(T, arg, radix);
         return result;
     }
 
-    std.debug.warn("{s}\n\n", .{message});
+    std.log.warn("{s}\n\n", .{message});
     printHelp();
     return error.InvalidArgs;
 }
 
 fn printHelp() void {
-    std.debug.warn("Usage: doom-fire WIDTH HEIGHT [SLEEP] [RENDERER]\n", .{});
-    std.debug.warn("       SLEEP    - Render loop delay in ms\n", .{});
-    std.debug.warn("       RENDERER - Enable alternate renderer (current just outputs text) by supplying any value\n\n", .{});
+    std.log.info("Usage: doom-fire WIDTH HEIGHT [SLEEP] [RENDERER]\n", .{});
+    std.log.info("       SLEEP    - Render loop delay in ms\n", .{});
+    std.log.info("       RENDERER - Enable alternate renderer (current just outputs text) by supplying any value\n\n", .{});
 }

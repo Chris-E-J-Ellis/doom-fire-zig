@@ -3,18 +3,23 @@ const std = @import("std");
 
 pub fn build(b: *Builder) void {
     const target = b.standardTargetOptions(.{});
-    const mode = b.standardReleaseOptions();
-    const exe = b.addExecutable("doom-fire", "src/main.zig");
-    exe.setTarget(target);
+    const optimize = b.standardOptimizeOption(.{ .preferred_optimize_mode = .Debug });
+    const exe = b.addExecutable(.{
+        .name = "doom-fire",
+        .root_source_file = .{ .path = "src/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
 
     exe.linkSystemLibrary("c");
     exe.linkSystemLibrary("sdl2");
 
+    exe.addIncludePath("deps/include");
+    exe.addLibraryPath("deps/lib");
+
     // I'm not entirely sure what I'm doing in the build currently,
     // but this will sort my two use cases for the moment =D
-    if (std.Target.current.os.tag == .windows) {
-        exe.addIncludeDir("deps/include");
-        exe.addLibPath("deps/lib");
+    if (target.getOsTag() == .windows) {
         exe.linkSystemLibrary("ole32");
         exe.linkSystemLibrary("oleaut32");
         exe.linkSystemLibrary("imm32");
@@ -22,15 +27,8 @@ pub fn build(b: *Builder) void {
         exe.linkSystemLibrary("version");
         exe.linkSystemLibrary("gdi32");
         exe.linkSystemLibrary("setupapi");
-
-        exe.setTarget(.{
-            .cpu_arch = .x86_64,
-            .os_tag = .windows,
-            .abi = .gnu,
-        });
     }
 
-    exe.setBuildMode(mode);
     exe.install();
 
     const run_cmd = exe.run();
