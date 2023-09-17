@@ -29,9 +29,7 @@ pub fn build(b: *Builder) void {
         exe.linkSystemLibrary("setupapi");
     }
     b.installArtifact(exe);
-    //exe.install();
 
-    //const run_cmd = exe.run();
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
     const default_args = [_][]const u8{ "300", "300" };
