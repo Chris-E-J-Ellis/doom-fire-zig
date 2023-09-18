@@ -5,7 +5,7 @@ const sdl = @cImport({
     @cInclude("SDL2/SDL.h");
 });
 
-const SDL_WINDOWPOS_UNDEFINED = @bitCast(c_int, sdl.SDL_WINDOWPOS_UNDEFINED_MASK);
+const SDL_WINDOWPOS_UNDEFINED: c_int = @bitCast(sdl.SDL_WINDOWPOS_UNDEFINED_MASK);
 
 var back_buffer: []u32 = undefined;
 var screen: *sdl.SDL_Window = undefined;
@@ -31,8 +31,8 @@ fn initWindow(buffer: fe.FireBuffer) !void {
         return error.SDLInitializationFailed;
     }
 
-    const width = @intCast(c_int, buffer.width);
-    const height = @intCast(c_int, buffer.height);
+    const width: c_int = @intCast(buffer.width);
+    const height: c_int = @intCast(buffer.height);
 
     screen = sdl.SDL_CreateWindow("Doom Fire Effect", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, sdl.SDL_WINDOW_RESIZABLE) orelse {
         sdl.SDL_Log("Unable to create window: %s", sdl.SDL_GetError());
@@ -81,7 +81,7 @@ pub fn renderFire(buffer: fe.FireBuffer) void {
         }
     }
 
-    _ = sdl.SDL_UpdateTexture(texture, null, &back_buffer[0], @intCast(c_int, buffer.width * 4));
+    _ = sdl.SDL_UpdateTexture(texture, null, &back_buffer[0], @intCast(buffer.width * 4));
     _ = sdl.SDL_RenderClear(renderer);
     _ = sdl.SDL_RenderCopy(renderer, texture, null, null);
     _ = sdl.SDL_RenderPresent(renderer);

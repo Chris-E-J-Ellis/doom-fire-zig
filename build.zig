@@ -14,8 +14,8 @@ pub fn build(b: *Builder) void {
     exe.linkSystemLibrary("c");
     exe.linkSystemLibrary("sdl2");
 
-    exe.addIncludePath("deps/include");
-    exe.addLibraryPath("deps/lib");
+    exe.addIncludePath(.{ .cwd_relative = "deps/include" });
+    exe.addLibraryPath(.{ .cwd_relative = "deps/lib" });
 
     // I'm not entirely sure what I'm doing in the build currently,
     // but this will sort my two use cases for the moment =D
@@ -28,10 +28,9 @@ pub fn build(b: *Builder) void {
         exe.linkSystemLibrary("gdi32");
         exe.linkSystemLibrary("setupapi");
     }
+    b.installArtifact(exe);
 
-    exe.install();
-
-    const run_cmd = exe.run();
+    const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
     const default_args = [_][]const u8{ "300", "300" };
     run_cmd.addArgs(&default_args);
